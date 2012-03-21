@@ -37,10 +37,20 @@ class HomeController < ApplicationController
     		return
   	end
 
-  	@current_answer = "Option 3"
+  	# @current_answer = "Option 3"
+
+	@current_question_index = cookies[:current_question].to_i
+	@current_question = Question.all[@current_question_index]
+	@correct_answer = @current_question.answer
 
 	@answer = "Option " + params['Digits']
-	@result = @answer == @current_answer ? "100%" : "0%"
+	@result = @answer == @correct_answer ? "100%" : "0%"
+
+	@current_question_index = @current_question_index + 1
+	if (@current_question_index < Question.all.length)
+		redirect_to :action => 'index'
+		return
+	end
 
 	render :action => "render_report.xml.builder"
 	
