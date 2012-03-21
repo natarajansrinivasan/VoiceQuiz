@@ -3,7 +3,8 @@ require "twilio-ruby"
 class HomeController < ApplicationController
 
   # base URL of this application
-  BASE_URL = "http://localhost:3000/home"
+  # BASE_URL = "http://localhost:3000/home"
+  BASE_URL = "http://ec2-23-21-156-76.compute-1.amazonaws.com/home"
 
   @current_question = ""
 
