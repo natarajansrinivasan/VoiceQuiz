@@ -6,10 +6,22 @@ class HomeController < ApplicationController
   # BASE_URL = "http://localhost:3000/home"
   BASE_URL = "http://ec2-23-21-156-76.compute-1.amazonaws.com/home"
 
-  @current_question = ""
 
   def index
 	@post_to = BASE_URL + '/process_answer'
+
+	@questions = Question.all
+
+	if cookies[:current_question]
+		@current_question_index = cookies[:current_question].to_i + 1
+		@current_question = @questions[@current_question_index]
+		cookies[:current_question] = @current_question_index
+	else
+		@current_question_index = 0
+		@current_question = @questions[@current_question_index]
+		cookies[:current_question] = @current_question_index
+	end
+
 	render :action => "ask_question.xml.builder"
   end
 
