@@ -12,15 +12,8 @@ class HomeController < ApplicationController
 
 	@questions = Question.all
 
-	if cookies[:current_question]
-		@current_question_index = cookies[:current_question].to_i + 1
-		@current_question = @questions[@current_question_index]
-		cookies[:current_question] = @current_question_index
-	else
-		@current_question_index = 0
-		@current_question = @questions[@current_question_index]
-		cookies[:current_question] = @current_question_index
-	end
+	@current_question_index = 0
+	@current_question = @questions[@current_question_index]
 
 	render :action => "ask_question.xml.builder"
   end
