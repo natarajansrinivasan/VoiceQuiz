@@ -4,8 +4,13 @@ class HomeController < ApplicationController
 
   # base URL of this application
   # BASE_URL = "http://localhost:3000/home"
-  BASE_URL = "http://ec2-23-21-156-76.compute-1.amazonaws.com/home"
+  # BASE_URL = "http://ec2-23-21-156-76.compute-1.amazonaws.com/home"
 
+  if Rails.env.production?
+	BASE_URL = "http://ec2-23-21-156-76.compute-1.amazonaws.com/home"
+  else  
+	BASE_URL = "http://localhost:3000/home"
+  end
 
   def index
 	@post_to = BASE_URL + '/process_answer'
