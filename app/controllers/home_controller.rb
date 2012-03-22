@@ -42,20 +42,52 @@ class HomeController < ApplicationController
     		return
   	end
 
-  	# @current_answer = "Option 3"
-
 	@current_question_index = cookies[:current_question].to_i
 	@current_question = Question.all[@current_question_index]
 	@correct_answer = @current_question.answer
 
 	@answer = "Option " + params['Digits']
-	@result = @answer == @correct_answer ? "100%" : "0%"
+	# @result = @answer == @correct_answer ? "100%" : "0%"
+
+	if (@answer != @correct_answer)
+		if cookies[:wrong_answers]
+			# format the current cookie data as an array of integers; first element is count, following elements are indices of
+			# questions that were wrongly answered
+			@current_wrong_answers_data = cookies[:wrong_answers].split(",").map { |s| s.to_i }
+
+			# first element in the array is the total number of wrong answers
+			@current_wrong_answers_data[0] += 1
+
+		else
+			# the cookie does not exist, as this must be the first wrong answer
+			# first element in the array is the total number of wrong answers, make it 1
+			@current_wrong_answers_data = [1];
+		end
+
+		# add the index of the current question to the list of wrongly answered questions
+		@current_wrong_answers_data << @current_question_index
+
+		# now put the array back into a string and update the cookie
+		cookies[:wrong_answers] = @current_wrong_answers_data.join(",")
+	end 
 
 	@current_question_index = @current_question_index + 1
 	if (@current_question_index < Question.all.length)
 		redirect_to :action => 'index'
 		return
 	end
+
+	# now the quiz is done, compute total score and return it
+	if cookies[:wrong_answers]
+		@total_wrong_answers = cookies[:wrong_answers].split(",")[0].to_i
+		@result = "#{((Question.all.length - @total_wrong_answers).to_f/Question.all.length.to_f * 100.0).round}%"		
+	else
+		@result = "100%"
+	end
+
+	# delete cookies
+	cookies.delete :current_question
+	cookies.delete :wrong_answers
 
 	render :action => "render_report.xml.builder"
 	
