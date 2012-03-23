@@ -12,6 +12,7 @@ class HomeController < ApplicationController
 	BASE_URL = "http://localhost:3000/home"
   end
 
+
   def index
 	@post_to = BASE_URL + '/process_answer'
 
@@ -20,10 +21,14 @@ class HomeController < ApplicationController
 	if cookies[:cookie_data]
 		@cookie_data = cookies[:cookie_data].split(",").map { |s| s.to_i }
 
-		#increment current question index to iterate to the next question
-		@cookie_data[0] += 1		
+		#increment current question index to iterate to the next question, unless we have been asked to repeat the current question
+		@cookie_data[0] += 1 unless params['repeat_question'] == '1'		
 		@current_question_index = @cookie_data[0]
 		@current_question = @questions[@current_question_index]
+
+		if params['repeat_question'] == '1'
+			@repeat_question_rendering = true
+		end
 
 		#update the cookie
 		cookies[:cookie_data] = @cookie_data.join(",")
@@ -33,14 +38,16 @@ class HomeController < ApplicationController
 
 		# cookie does not exist yet, create it here with the sole data element representing the current question index
 		cookies[:cookie_data] = @current_question_index
+
+		@render_intro = true
 	end
 
 	render :action => "ask_question.xml.builder"
   end
 
   def process_answer
-	if !params['Digits'] or params['Digits'] == '0'
-    		redirect_to :action => 'index'
+	if !params['Digits'] or params['Digits'] == '0' or !['1','2','3','4'].member?(params['Digits'])
+		redirect_to BASE_URL + '/index?repeat_question=1'
     		return
   	end
 
@@ -70,8 +77,9 @@ class HomeController < ApplicationController
 		cookies[:cookie_data] = @cookie_data.join(",")
 	end 
 
+	@total_number_of_questions = Question.count
 	@current_question_index = @current_question_index + 1
-	if (@current_question_index < Question.all.length)
+	if (@current_question_index < @total_number_of_questions)
 		redirect_to :action => 'index'
 		return
 	end
@@ -79,7 +87,7 @@ class HomeController < ApplicationController
 	# now the quiz is done, compute total score and render it
 	if @cookie_data.length > 1
 		@total_wrong_answers = @cookie_data[1]
-		@result = "#{((Question.all.length - @total_wrong_answers).to_f/Question.all.length.to_f * 100.0).round}%"		
+		@result = "#{((@total_number_of_questions - @total_wrong_answers).to_f/@total_number_of_questions.to_f * 100.0).round}%"		
 	else
 		@result = "100%"
 	end
