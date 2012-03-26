@@ -12,7 +12,7 @@
   <% end %>
 
   <div class="field">
-    <%= f.label :q_text %><br />
+    <%= f.label :q_text, 'The Question' %><br />
     <%= f.text_field :q_text %>
   </div>
   <div class="field">
@@ -32,8 +32,8 @@
     <%= f.text_field :option_4 %>
   </div>
   <div class="field">
-    <%= f.label :answer %><br />
-    <%= f.text_field :answer %>
+    <%= f.label :answer, 'And the correct answer is' %><br />
+    <%= f.select(:answer, [['Option 1', 'Option 1'],['Option 2', 'Option 2'], ['Option 3', 'Option 3'], ['Option 4', 'Option 4']]) %>
   </div>
   <div class="actions">
     <%= f.submit %>
